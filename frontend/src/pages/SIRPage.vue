@@ -1,24 +1,19 @@
 <template>
-  <div class="dashboard-page">
-    <TopBar @arrow-click="onHeaderArrowClick" class="dashboard-header" />
+  <div class="dashboard-layout">
+    <aside class="layout-sidebar">
+      <SIRParams v-model="params"
+                  :loading="loading"
+                  @calculate="runSimulation" />
+    </aside>
 
-    <div class="dashboard-layout">
-      <aside class="layout-sidebar">
-        <SIRParams v-model="params"
-                   :loading="loading"
-                   @calculate="runSimulation" />
-      </aside>
-
-      <main class="layout-main">
-        <SimulationPlot :points="sharedPoints" />
-      </main>
-    </div>
+    <main class="layout-main">
+      <SimulationPlot :points="sharedPoints" />
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, nextTick } from 'vue';
-import TopBar from 'components/TopBar.vue';
 import SIRParams from 'components/SIRParams.vue';
 import SimulationPlot from 'components/SimulationPlot.vue';
 
@@ -39,10 +34,6 @@ const params = reactive({
   dr: 2.0,
   tmax: 100
 });
-
-const onHeaderArrowClick = () => {
-  console.log('Клик по стрелке в шапке!');
-};
 
 const runSimulation = async () => {
   loading.value = true;
@@ -105,25 +96,11 @@ const runSimulation = async () => {
 </script>
 
 <style scoped>
-  .dashboard-page {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: #f8fafc;
-    font-family: system-ui, -apple-system, sans-serif;
-  }
-
-  .dashboard-header {
-    width: 100%;
-    flex-shrink: 0;
-  }
-
   .dashboard-layout {
     display: grid;
     grid-template-columns: 350px 1fr;
     gap: 24px;
     padding: 24px;
-    flex-grow: 1;
     align-items: start; 
   }
 

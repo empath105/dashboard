@@ -21,10 +21,17 @@
     </div>
 
     <div class="header-right">
-      <button class="action-arrow-btn" @click="handleArrowClick" title="Следующая модель">
+      <button v-if="showBackButton" class="action-arrow-btn" @click="goBack" title="Предыдущая модель">
+        <div class="arrow-wrapper">
+          <i class="arrow-head left"></i>
+          <span class="arrow-shaft"></span>
+        </div>
+      </button>
+
+      <button v-if="showForwardButton" class="action-arrow-btn" @click="goForward" title="Следующая модель">
         <div class="arrow-wrapper">
           <span class="arrow-shaft"></span>
-          <i class="arrow-head"></i>
+          <i class="arrow-head right"></i>
         </div>
       </button>
     </div>
@@ -33,13 +40,27 @@
 
 <script setup lang="ts">
   import { computed } from 'vue';
-  import { useRoute } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
 
   const route = useRoute();
-  const pageTitle = computed(() => (route.meta.title as string) || 'SIR Модель');
+  const router = useRouter();
 
-  const emit = defineEmits(['arrow-click']);
-  const handleArrowClick = () => emit('arrow-click');
+  const pageTitle = computed(() => (route.meta.title as string) || 'Модель');
+  const currentIndex = computed(() => (route.meta.index as number) || 1);
+
+  const showBackButton = computed(() => currentIndex.value > 1);
+  const showForwardButton = computed(() => currentIndex.value < 3);
+
+  const goForward = () => {
+    if (currentIndex.value === 1) void router.push('/sir2');
+    else if (currentIndex.value === 2) void router.push('/sir3');
+  };
+
+  const goBack = () => {
+    if (currentIndex.value === 2) void router.push('/sir');
+    else if (currentIndex.value === 3) void router.push('/sir2');
+  };
+
 </script>
 
 <style scoped>
@@ -103,6 +124,9 @@
   }
 
   .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     z-index: 1;
   }
 
@@ -134,7 +158,6 @@
     height: 2px;
     background-color: #ffffff;
     display: inline-block;
-    transform: translateX(2px);
     transition: all 0.3s ease;
   }
 
@@ -143,8 +166,23 @@
     border-width: 0 2px 2px 0;
     display: inline-block;
     padding: 3px;
-    transform: rotate(-45deg) translateX(-1px);
     transition: all 0.3s ease;
+  }
+
+  .right {
+    transform: rotate(-45deg) translateX(-1px);
+  }
+
+  .action-arrow-btn:not(:hover) .arrow-shaft:has(+ .right) {
+    transform: translateX(2px);
+  }
+
+  .left {
+    transform: rotate(135deg) translateX(-1px);
+  }
+
+  .action-arrow-btn:not(:hover) .arrow-shaft {
+    transform: translateX(-2px);
   }
 
   .action-arrow-btn:hover {
@@ -155,11 +193,18 @@
 
     .action-arrow-btn:hover .arrow-shaft {
       background-color: #5581ba;
-      transform: translateX(4px);
     }
 
     .action-arrow-btn:hover .arrow-head {
       border-color: #5581ba;
+    }
+
+    .action-arrow-btn:hover .arrow-shaft:has(+ .right) {
+      transform: translateX(4px);
+    }
+
+    .action-arrow-btn:hover .arrow-shaft {
+      transform: translateX(-4px); 
     }
 
   .action-arrow-btn:active {
