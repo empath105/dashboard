@@ -52,13 +52,13 @@
   const showForwardButton = computed(() => currentIndex.value < 3);
 
   const goForward = () => {
-    if (currentIndex.value === 1) void router.push('/sir2');
-    else if (currentIndex.value === 2) void router.push('/sir3');
+    if (currentIndex.value === 1) void router.push('/fkpp');
+    else if (currentIndex.value === 2) void router.push('/turing');
   };
 
   const goBack = () => {
     if (currentIndex.value === 2) void router.push('/sir');
-    else if (currentIndex.value === 3) void router.push('/sir2');
+    else if (currentIndex.value === 3) void router.push('/fkpp');
   };
 
 </script>

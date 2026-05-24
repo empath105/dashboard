@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-layout">
     <aside class="layout-sidebar">
-      <SIRParams v-model="params"
+      <TuringParams v-model="params"
                   :loading="loading"
                   @calculate="runSimulation" />
     </aside>
@@ -9,17 +9,17 @@
     <main class="layout-main">
       <SimulationPlot :points="sharedPoints"
                       :zmin="0"
-                      :zmax="1"
-                      :step="0.05"
+                      :zmax="5"
+                      :step="0.25"
                       :xmin="0"
-                      :xmax="100"/>
+                      :xmax="1"/>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, nextTick } from 'vue';
-import SIRParams from 'components/SIRParams.vue';
+import TuringParams from 'components/TuringParams.vue';
 import SimulationPlot from 'components/SimulationPlot.vue';
 
 interface Point {
@@ -32,19 +32,18 @@ const loading = ref(false);
 const sharedPoints = ref<Point[]>([]);
 
 const params = reactive({
-  beta: 0.4,
-  gamma: 0.1,
-  ds: 2.0,
-  di: 0.5,
-  dr: 2.0,
-  tmax: 100
+  a: 0.1,
+  b: 0.9,
+  Du: 0.001,
+  Dv: 0.04,
+  tmax: 140
 });
 
 const runSimulation = async () => {
   loading.value = true;
   sharedPoints.value = [];
 
-  const url = `http://127.0.0.1:8000/api/run_sir/?beta=${params.beta}&gamma=${params.gamma}&di=${params.di}&ds=${params.ds}&dr=${params.dr}&tmax=${params.tmax}`;
+  const url = `http://127.0.0.1:8000/api/run_turing/?a=${params.a}&b=${params.b}&Du=${params.Du}&Dv=${params.Dv}&tmax=${params.tmax}`;
 
   try {
     const response = await fetch(url);

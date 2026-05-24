@@ -1,0 +1,73 @@
+include "getARGV.idp"
+
+real a = getARGV("-a", 0.1);
+real b = getARGV("-b", 0.9);
+real Du = getARGV("-Du", 0.001);
+real Dv = getARGV("-Dv", 0.04);
+real T = getARGV("-T", 140.0);
+
+int N = 100;
+mesh Th = square(N, N, flags = 1);
+
+fespace Vh(Th, P1);
+Vh u, v;
+Vh uold, vold;
+Vh p, q;
+
+real dt = 0.2;
+
+// Начальные условия
+u = (a + b) + 0.01 * (randreal1() - 0.5);
+v = (b / (a + b) ^ 2) + 0.01 * (randreal1() - 0.5);
+
+uold = u;
+vold = v;
+
+problem DiffusionU(u, p) =
+int2d(Th)(
+    u * p / dt
+    + Du * (dx(u) * dx(p) + dy(u) * dy(p))
+    + u * p
+    - 2.0 * uold * vold * u * p
+    )
+    - int2d(Th)(
+        uold * p / dt
+        + a * p
+        - (uold ^ 2 * vold) * p
+        );
+
+problem DiffusionV(v, q) =
+int2d(Th)(
+    v * q / dt
+    + Dv * (dx(v) * dx(q) + dy(v) * dy(q))
+    + u ^ 2 * v * q
+    )
+    - int2d(Th)(
+        vold * q / dt
+        + b * q
+        );
+
+int step = 0;
+for (real t = 0; t < T; t += dt) {
+    step++;
+
+    DiffusionU;
+    DiffusionV;
+
+    uold = u;
+    vold = v;
+
+    if (step % 5 == 0 || t == dt) {
+        plot(u, fill = 1, value = 1, nbiso = 20, wait = 0, cmm = "Time: " + t);
+        cout << "FRAME_START" << endl;
+
+        for (int i = 0; i < Th.nv; i++) {
+            cout << Th(i).x << " " << Th(i).y << " " << u[](i) << endl;
+        }
+        cout << "FRAME_END" << endl;
+    }
+    // if ((step - 1) % 600 == 0) {
+    //     plot(u, fill=1, value=1, nbiso=20, wait=1, cmm="Time: " + t);
+    // }
+    //plot(u, fill = 1, value = 1, nbiso = 20, wait = 0, cmm = "Time: " + t);
+}

@@ -1,52 +1,57 @@
 <template>
   <div class="dashboard-layout">
     <aside class="layout-sidebar">
-      <SIRParams v-model="params"
+      <FKPPParams v-model="params"
                  :loading="loading"
                  @calculate="runSimulation" />
     </aside>
 
     <main class="layout-main">
-      <SimulationPlot :points="sharedPoints" />
+      <SimulationPlot :points="sharedPoints"
+                      :zmin="0"
+                      :zmax="1.1"
+                      :step="0.1"
+                      :xmin="-200"
+                      :xmax="200"/>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
   import { ref, reactive, nextTick } from 'vue';
-  import SIRParams from 'components/SIRParams.vue';
+  import FKPPParams from 'components/FKPPParams.vue';
   import SimulationPlot from 'components/SimulationPlot.vue';
 
-  interface SirPoint {
+  interface Point {
     x: number;
     y: number;
     val: number;
   }
 
   const loading = ref(false);
-  const sharedPoints = ref<SirPoint[]>([]);
+  const sharedPoints = ref<Point[]>([]);
 
   const params = reactive({
-    beta: 0.4,
-    gamma: 0.1,
-    ds: 2.0,
-    di: 0.5,
-    dr: 2.0,
-    tmax: 100
+    B: 1.0,
+    q: 0.5,
+    Da: 1.0,
+    Ds: 5000.0,
+    Scrit: 0.3,
+    tmax: 50
   });
 
   const runSimulation = async () => {
     loading.value = true;
     sharedPoints.value = [];
 
-    const url = `http://127.0.0.1:8000/api/run_sir/?beta=${params.beta}&gamma=${params.gamma}&di=${params.di}&ds=${params.ds}&dr=${params.dr}&tmax=${params.tmax}`;
+    const url = `http://127.0.0.1:8000/api/run_fkpp/?B=${params.B}&q=${params.q}&Da=${params.Da}&Ds=${params.Ds}&Scrit=${params.Scrit}&tmax=${params.tmax}`;
 
     try {
       const response = await fetch(url);
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
 
-      let currentPoints: SirPoint[] = [];
+      let currentPoints: Point[] = [];
       let buffer = '';
       let isRendering = false;
 
@@ -97,14 +102,19 @@
 
 <style scoped>
   .dashboard-layout {
-    display: grid;
-    grid-template-columns: 350px 1fr;
+    display: flex;
     gap: 24px;
     padding: 24px;
     align-items: start;
+    justify-content: flex-start;
+    min-height: 100%;
+    box-sizing: border-box;
+    background: #f8fafc;
   }
 
   .layout-sidebar {
+    width: 350px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
   }
@@ -112,21 +122,32 @@
   .layout-main {
     background: #ffffff;
     border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     padding: 24px;
-    min-height: 500px;
-    max-width: 55vw;
+    height: 80vh;
+    width: 90vh;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
   }
 
   @media (max-width: 992px) {
     .dashboard-layout {
-      grid-template-columns: 1fr;
+      flex-direction: column;
       gap: 16px;
       padding: 16px;
+    }
+
+    .layout-sidebar {
+      width: 100%;
+    }
+
+    .layout-main {
+      width: 100%;
+      height: 550px;
     }
   }
 </style>

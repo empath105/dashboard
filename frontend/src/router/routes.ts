@@ -9,14 +9,14 @@ const routes = [
     meta: { title: 'SIR модель', index: 1 }
   },
   {
-    path: '/sir2',
-    component: () => import('pages/SIRPage2.vue'),
-    meta: { title: 'SIR2 модель', index: 2 }
+    path: '/fkpp',
+    component: () => import('pages/FKPPPage.vue'),
+    meta: { title: 'Ф-КПП модель', index: 2 }
   },
   {
-    path: '/sir3',
-    component: () => import('pages/SIRPage.vue'),
-    meta: { title: 'SIR3 модель', index: 3 }
+    path: '/turing',
+    component: () => import('pages/TuringPage.vue'),
+    meta: { title: 'Пятна Тьюринга', index: 3 }
   }
 ];
 

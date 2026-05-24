@@ -8,17 +8,31 @@
 import { watch, onMounted } from 'vue';
 import Plotly from 'plotly.js-dist-min';
 
-interface SirPoint {
+interface Point {
   x: number;
   y: number;
   val: number;
 }
 
-const props = defineProps<{
-  points: SirPoint[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    points: Point[];
+    zmin?: number;
+    zmax?: number;
+    step?: number;
+    xmin?: number;
+    xmax?: number;
+  }>(),
+  {
+    zmin: 0,
+    zmax: 1,
+    step: 0.05,
+    xmin: 0,
+    xmax: 100
+  }
+);
 
-const drawPlot = (points: SirPoint[]) => {
+const drawPlot = (points: Point[]) => {
   if (points.length <= 3) return;
 
   const plotData = [{
@@ -27,20 +41,57 @@ const drawPlot = (points: SirPoint[]) => {
     z: points.map(p => p.val),
     type: 'contour',
     colorscale: 'Jet',
-    zmin: 0,
-    zmax: 1,
+    zmin: props.zmin,
+    zmax: props.zmax,
     autocontour: false,
-    contours: { start: 0, end: 1, size: 0.05 }
+    contours: {
+      start: props.zmin,
+      end: props.zmax,
+      size: props.step
+    },
+    colorbar: {
+      x: 1.02,           
+      xanchor: 'left',   
+      xref: 'x',         
+      thickness: 20,     
+      len: 1 
+    }
   }];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Plotly.react('sir-plot', plotData as any, {
-    title: 'Динамика распространения (Live)',
+  const layout = {
+    title: {
+      text: 'Динамика распространения',
+      font: { size: 16, color: '#334155', weight: '600' }
+    },
     uirevision: 'true',
     responsive: true,
     autosize: true,
-    displayModeBar: false
-  });
+    displayModeBar: false,
+    xaxis: {
+      scaleanchor: 'y',
+      scaleratio: 1,
+      automargin: true,
+      autorange: false,
+      range: [props.xmin, props.xmax],
+      showgrid: false,
+      zeroline: false,
+      constrain: 'domain'
+    },
+    yaxis: {
+      automargin: true,
+      autorange: false,
+      range: [props.xmin, props.xmax],
+      showgrid: false,
+      zeroline: false,
+      constrain: 'domain'
+    },
+    margin: { l: 60, r: 80, t: 60, b: 60 },
+    paper_bgcolor: 'rgba(0,0,0,0)', 
+    plot_bgcolor: 'rgba(0,0,0,0)'   
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Plotly.react('sir-plot', plotData as any, layout as any);
 };
 
 onMounted(() => {
@@ -55,25 +106,17 @@ watch(() => props.points, (newPoints) => {
 
 <style scoped>
   .plot-container {
-    height: 70vh;
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    padding: 15px;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    overflow: hidden;
-  }
-  .plot-container:hover {
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
   }
 
   .plot-canvas {
     width: 100%;
     height: 100%;
     max-width: 100%;
+    max-height: 100%;
   }
 </style>

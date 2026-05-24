@@ -8,14 +8,14 @@ real DR = getARGV("-DR", 2.0);
 real Tmax = getARGV("-Tmax", 100.0);
 
 int N = 80;
-mesh Th = square(N, N, [100 * x, 100 * y]);
+mesh Th = square(N, N, [100 * x, 100 * y], flags = 1);
 
 fespace Vh(Th, P1);
 Vh S, I, R;
 Vh S0, I0, R0;
 Vh vS, vI, vR;
 
-real dt = 1;
+real dt = 0.1;
 
 I0 = 0.05 * exp(-((x - 50) ^ 2 + (y - 50) ^ 2) / 20);
 S0 = 1.0 - I0;
@@ -55,7 +55,10 @@ for (real t = dt; t <= Tmax; t += dt) {
 		}
 		cout << "FRAME_END" << endl;
 	}
-	
+	/*if (step % 100 == 0) {
+		plot(I, fill = 1, value = 1, nbiso = 20, cmm = "Infected I(x,y) at t = " + t);
+	}*/
+
 
 	S0 = S;
 	I0 = I;
